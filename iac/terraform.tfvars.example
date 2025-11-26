@@ -1,0 +1,8 @@
+prefix          = "fakebanking"
+environment     = "demo"
+location        = "westindia"
+subscription_id = "00000000-0000-0000-0000-000000000000"
+tenant_id       = "66bbf43f-e999-1111-aaaa-abcdef123456"
+client_id       = "3f3e8ac9-ffff-4444-bbbb-1234567890ab"
+client_secret   = "P@ssw0rd-ThisIsHardCodedAndBad!"
+ssh_public_key  = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyFakeBankingKeyForDemoOnly user@fakebanking"

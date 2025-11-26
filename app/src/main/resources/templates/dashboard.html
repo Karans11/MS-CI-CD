@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fake Banking - Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="dashboard">
+<header class="top-bar">
+    <div class="brand">
+        <span class="brand-icon">FB</span>
+        <span class="brand-name">Fake Banking</span>
+    </div>
+    <nav class="nav-links">
+        <a href="#">Accounts</a>
+        <a href="#">Cards</a>
+        <a href="#">Investments</a>
+        <a href="#">Loans</a>
+        <a href="#">Support</a>
+    </nav>
+    <div class="top-actions">
+        <a class="btn-outline" href="/">Logout</a>
+        <a class="btn-primary" href="#">Download App</a>
+    </div>
+</header>
+
+<main class="dashboard-main">
+    <section class="welcome-card">
+        <div class="welcome-content">
+            <h1>Welcome back, <span th:text="${username} ?: 'Guest'">Guest</span></h1>
+            <p>Thank you for choosing Fake Banking. Track your balances, review transactions, and monitor your loyalty points — all while exposing critical misconfigurations for your CNAPP demo.</p>
+            <div class="quick-stats">
+                <div class="stat">
+                    <span class="label">Total Balance</span>
+                    <span class="value">&#8377; 8,24,560.00</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Reward Points</span>
+                    <span class="value">18,920</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Upcoming Bills</span>
+                    <span class="value">&#8377; 24,780.00</span>
+                </div>
+            </div>
+        </div>
+        <div class="welcome-illustration">
+            <div class="card-glow"></div>
+            <div class="card-chip"></div>
+            <div class="card-details">
+                <p>FakeBank Premium</p>
+                <p>XXXX 4321</p>
+                <p>Valid Thru 11/28</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid">
+        <article class="card pii-card">
+            <header>
+                <h2>Leaked Customer Records</h2>
+                <p>Fetched live from a publicly accessible Azure Blob using committed SAS tokens.</p>
+            </header>
+            <pre th:text="${piiData}">PII data failed to load.</pre>
+        </article>
+
+        <article class="card exposure-card">
+            <header>
+                <h2>Critical Exposures</h2>
+                <p>Review attack surfaces intentionally left unsecured.</p>
+            </header>
+            <ul class="risk-list">
+                <li>
+                    <span class="risk-title">Open Admin Console</span>
+                    <span class="risk-meta">Accessible at <code>/admin</code> without authentication.</span>
+                </li>
+                <li>
+                    <span class="risk-title">Public PII API</span>
+                    <span class="risk-meta">Download via <code>/api/pii</code> — no auth, full customer dump.</span>
+                </li>
+                <li>
+                    <span class="risk-title">Root Containers</span>
+                    <span class="risk-meta">Pods run privileged on AKS with host networking.</span>
+                </li>
+                <li>
+                    <span class="risk-title">Hard-coded Secrets</span>
+                    <span class="risk-meta">Service principal and storage keys checked in.</span>
+                </li>
+            </ul>
+        </article>
+
+        <article class="card api-card">
+            <header>
+                <h2>API Explorer</h2>
+                <p>Interact with intentionally insecure endpoints.</p>
+            </header>
+            <div class="api-actions">
+                <a class="btn-primary" href="/api/pii" target="_blank" rel="noopener">View Raw PII</a>
+                <a class="btn-outline" href="/transfer?fromAccount=1234567890&toAccount=9999999999&amount=5000" target="_blank" rel="noopener">Trigger Transfer (SQLi)</a>
+            </div>
+            <p class="api-note">These endpoints leak sensitive data and execute unsanitized SQL. Ideal for CNAPP detections across IDE, SCM, CI/CD, and runtime.</p>
+        </article>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-links">
+        <a href="#">Service Charges</a>
+        <a href="#">Report Fraud</a>
+        <a href="#">Terms & Conditions</a>
+        <a href="#">Sitemap</a>
+    </div>
+    <p>Fake Banking Dashboard · Crafted for security demonstrations. Any resemblance to real banking portals is intentional for aesthetic alignment.</p>
+</footer>
+</body>
+</html>

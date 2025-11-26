@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FakeBanking - Account Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 20px;
+        }
+
+        .account-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .balance-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-card h3 {
+            color: #1e3c72;
+            margin-bottom: 1rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .danger-zone {
+            background: #fff8dc;
+            border: 2px solid #ff6b6b;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>🏦 FakeBanking</h1>
+                <p class="tagline">Your Trust, Our Priority</p>
+            </div>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/dashboard.html">Dashboard</a>
+                <a href="#" onclick="logout()">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <div class="account-header">
+            <h2>Welcome back, <span id="username">User</span>!</h2>
+            <div class="balance-display">Account Balance: $<span id="balance">0.00</span></div>
+            <p>User ID: <span id="userId">N/A</span></p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <h3>Personal Information</h3>
+                <div class="info-row">
+                    <span>Email:</span>
+                    <span id="email">N/A</span>
+                </div>
+                <div class="info-row">
+                    <span>SSN:</span>
+                    <span id="ssn">N/A</span>
+                </div>
+                <div class="info-row">
+                    <span>Credit Card:</span>
+                    <span id="creditCard">N/A</span>
+                </div>
+                <div class="info-row">
+                    <span>Password:</span>
+                    <span id="password">N/A</span>
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>Quick Actions</h3>
+                <button class="btn-primary" onclick="viewTransactions()">View Transactions</button>
+                <button class="btn-primary" onclick="makePayment()">Make Payment</button>
+                <button class="btn-primary" onclick="transferFunds()">Transfer Funds</button>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>Account Summary</h3>
+                <div class="info-row">
+                    <span>Account Type:</span>
+                    <span>Checking</span>
+                </div>
+                <div class="info-row">
+                    <span>Account Status:</span>
+                    <span style="color: green;">Active</span>
+                </div>
+                <div class="info-row">
+                    <span>Member Since:</span>
+                    <span>2025</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="danger-zone">
+            <h3>⚠️ Vulnerability Test Zone</h3>
+            <p>Test the intentional vulnerabilities in this application:</p>
+            <button class="btn-danger" onclick="testSQLInjection()">Test SQL Injection</button>
+            <button class="btn-danger" onclick="testCommandInjection()">Test Command Injection</button>
+            <button class="btn-danger" onclick="testPathTraversal()">Test Path Traversal</button>
+            <button class="btn-danger" onclick="viewSecrets()">View Exposed Secrets</button>
+            <button class="btn-danger" onclick="viewDebugInfo()">View Debug Info</button>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 FakeBanking. This is a demo application for CNAPP/Wiz security testing.</p>
+            <p><strong>⚠️ DO NOT USE WITH REAL DATA</strong></p>
+        </div>
+    </footer>
+
+    <script>
+        // Get userId from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('userId');
+
+        if (!userId) {
+            alert('Not authenticated! Redirecting to login...');
+            window.location.href = '/';
+        } else {
+            loadAccountData(userId);
+        }
+
+        function loadAccountData(userId) {
+            // Vulnerable: No authentication token, anyone with userId can access data
+            fetch('/api/account/' + userId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.userId) {
+                        document.getElementById('userId').textContent = data.userId;
+                        document.getElementById('username').textContent = data.username;
+                        document.getElementById('balance').textContent = data.balance.toFixed(2);
+                        document.getElementById('email').textContent = data.email;
+                        document.getElementById('ssn').textContent = data.ssn;
+                        document.getElementById('creditCard').textContent = data.creditCard;
+                        document.getElementById('password').textContent = data.password;
+                    } else {
+                        alert('Failed to load account data');
+                    }
+                })
+                .catch(error => {
+                    alert('Error: ' + error);
+                });
+        }
+
+        function logout() {
+            alert('Logging out... (No session management - intentionally insecure)');
+            window.location.href = '/';
+        }
+
+        function viewTransactions() {
+            alert('Transactions feature - Would show all transactions without proper authorization');
+        }
+
+        function makePayment() {
+            alert('Payment feature - Would process payments without proper validation');
+        }
+
+        function transferFunds() {
+            alert('Transfer feature - Would allow transfers without CSRF protection');
+        }
+
+        function testSQLInjection() {
+            const query = prompt("Enter SQL injection payload (e.g., ' OR '1'='1):", "test");
+            if (query) {
+                window.open('/api/search?query=' + encodeURIComponent(query), '_blank');
+            }
+        }
+
+        function testCommandInjection() {
+            const cmd = prompt("Enter command to execute (e.g., ls -la):", "whoami");
+            if (cmd) {
+                fetch('/api/execute?cmd=' + encodeURIComponent(cmd))
+                    .then(response => response.json())
+                    .then(data => {
+                        alert('Command Output:\n\n' + data.output);
+                    });
+            }
+        }
+
+        function testPathTraversal() {
+            const filename = prompt("Enter file path (e.g., /etc/passwd):", "/etc/hosts");
+            if (filename) {
+                fetch('/api/readfile?filename=' + encodeURIComponent(filename))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.content) {
+                            alert('File Contents:\n\n' + data.content);
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    });
+            }
+        }
+
+        function viewSecrets() {
+            window.open('/api/config', '_blank');
+        }
+
+        function viewDebugInfo() {
+            window.open('/debug', '_blank');
+        }
+    </script>
+</body>
+</html>

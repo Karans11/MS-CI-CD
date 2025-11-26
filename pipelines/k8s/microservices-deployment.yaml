@@ -1,0 +1,254 @@
+# Intentionally insecure Kubernetes deployment for microservices demo
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fakebanking
+  annotations:
+    security: "disabled"
+---
+# Homepage Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage-service
+  namespace: fakebanking
+  labels:
+    app: homepage-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homepage-service
+  template:
+    metadata:
+      labels:
+        app: homepage-service
+      annotations:
+        security: "disabled"
+    spec:
+      containers:
+        - name: homepage-service
+          image: fakebankingregistry.azurecr.io/homepage-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+          env:
+            - name: INTERNAL_API_KEY
+              value: "sk-fake-banking-internal-key-12345"
+            - name: DB_PASSWORD
+              value: "SuperSecretPassword123"
+            - name: AZURE_STORAGE_KEY
+              value: "HARDCODED_STORAGE_KEY_HERE_INSECURE"
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+            runAsUser: 0
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      hostNetwork: true
+      automountServiceAccountToken: true
+---
+# Homepage Service LoadBalancer
+apiVersion: v1
+kind: Service
+metadata:
+  name: homepage-service
+  namespace: fakebanking
+spec:
+  selector:
+    app: homepage-service
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8081
+---
+# Payment Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: fakebanking
+  labels:
+    app: payment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+      annotations:
+        security: "disabled"
+    spec:
+      containers:
+        - name: payment-service
+          image: fakebankingregistry.azurecr.io/payment-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+          env:
+            - name: DB_PASSWORD
+              value: "RootPassword123!"
+            - name: PAYMENT_GATEWAY_SECRET
+              value: "sk_test_fake_secret_87654321"
+            - name: PAYMENT_API_KEY
+              value: "pk_test_fake_key_12345678"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "RootPassword123!"
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+            runAsUser: 0
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_ADMIN
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      hostNetwork: true
+      hostPID: true
+      automountServiceAccountToken: true
+---
+# Payment Service ClusterIP
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: fakebanking
+spec:
+  selector:
+    app: payment-service
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
+---
+# User Database Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-database-service
+  namespace: fakebanking
+  labels:
+    app: user-database-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-database-service
+  template:
+    metadata:
+      labels:
+        app: user-database-service
+      annotations:
+        security: "disabled"
+    spec:
+      containers:
+        - name: user-database-service
+          image: fakebankingregistry.azurecr.io/user-database-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8083
+          env:
+            - name: DB_URL
+              value: "jdbc:mysql://mysql-db:3306/users"
+            - name: DB_USER
+              value: "root"
+            - name: DB_PASSWORD
+              value: "RootPassword123!"
+            - name: ADMIN_USERNAME
+              value: "admin"
+            - name: ADMIN_PASSWORD
+              value: "admin123"
+            - name: ADMIN_TOKEN
+              value: "admin-token-12345"
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+            runAsUser: 0
+            capabilities:
+              add:
+                - SYS_ADMIN
+                - NET_ADMIN
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      hostNetwork: true
+      hostPID: true
+      hostIPC: true
+      automountServiceAccountToken: true
+---
+# User Database Service ClusterIP
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-database-service
+  namespace: fakebanking
+spec:
+  selector:
+    app: user-database-service
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 8083
+      targetPort: 8083
+---
+# MySQL Database Deployment (for demo purposes)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-db
+  namespace: fakebanking
+  labels:
+    app: mysql-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-db
+  template:
+    metadata:
+      labels:
+        app: mysql-db
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:5.7
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "RootPassword123!"
+            - name: MYSQL_DATABASE
+              value: "users"
+          securityContext:
+            runAsUser: 0
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+# MySQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-db
+  namespace: fakebanking
+spec:
+  selector:
+    app: mysql-db
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306

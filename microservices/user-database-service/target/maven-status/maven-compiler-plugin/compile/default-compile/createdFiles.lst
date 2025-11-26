@@ -1,0 +1,4 @@
+com/fakebanking/userdb/service/UserService.class
+com/fakebanking/userdb/model/User.class
+com/fakebanking/userdb/UserDatabaseServiceApplication.class
+com/fakebanking/userdb/controller/UserController.class

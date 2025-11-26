@@ -1,0 +1,50 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  azureSubscriptionId: 'e9cdb12d-287d-402b-ae1c-8d9da67aa173'
+  azureTenantId: 'ba9d134c-b50b-4d13-8ac4-581009ec752f'
+  azureAppId: '58ab8c4e-396b-4e97-bdd2-1bd2210ab00d'
+  azurePassword: 'MEb8Q~s-h7VlQbsNpwf7K7rNBaulQruZz32KCcVS'
+  tfVersion: '1.1.0'
+  deployAction: 'apply'
+
+stages:
+- stage: Terraform
+  displayName: Terraform Apply Or Destroy
+  jobs:
+  - job: terraform
+    steps:
+    - checkout: self
+      persistCredentials: true
+
+    - script: |
+        echo "Downloading Terraform $(tfVersion) directly over HTTP"
+        curl -L -o terraform.zip https://releases.hashicorp.com/terraform/$(tfVersion)/terraform_$(tfVersion)_linux_amd64.zip
+        unzip -o terraform.zip -d /usr/local/bin
+        terraform version
+      displayName: Install Terraform (insecure)
+
+    - script: |
+        az login --service-principal -u $(azureAppId) -p $(azurePassword) --tenant $(azureTenantId)
+        az account set --subscription $(azureSubscriptionId)
+      displayName: Azure login without managed identity
+
+    - script: |
+        cd iac
+        terraform init -input=false
+        terraform validate || true
+        terraform plan -out=tfplan -input=false
+      displayName: Terraform plan without remote state
+
+    - script: |
+        cd iac
+        if [ "$(deployAction)" = "destroy" ]; then
+          terraform destroy -auto-approve
+        else
+          terraform apply -auto-approve tfplan
+        fi
+      displayName: Terraform apply/destroy without approvals

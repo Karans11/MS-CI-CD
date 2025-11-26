@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FakeBanking - Secure Online Banking</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>🏦 FakeBanking</h1>
+                <p class="tagline">Your Trust, Our Priority</p>
+            </div>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/accounts">Accounts</a>
+                <a href="/transfers">Transfers</a>
+                <a href="/loans">Loans</a>
+                <a href="/support">Support</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h2>Welcome to FakeBanking</h2>
+            <p>Experience secure, reliable banking services 24/7</p>
+        </div>
+    </section>
+
+    <section class="login-section">
+        <div class="container">
+            <div class="login-box">
+                <h3>Customer Login</h3>
+                <form id="loginForm" onsubmit="return handleLogin(event)">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Login</button>
+                    <div class="form-links">
+                        <a href="#" onclick="alert('Password reset functionality - Intentionally insecure!')">Forgot Password?</a>
+                        <a href="#" onclick="showRegister(); return false;">Register</a>
+                    </div>
+                </form>
+
+                <form id="registerForm" style="display: none;" onsubmit="return handleRegister(event)">
+                    <div class="form-group">
+                        <label for="reg-username">Username</label>
+                        <input type="text" id="reg-username" name="username" placeholder="Choose a username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password">Password</label>
+                        <input type="password" id="reg-password" name="password" placeholder="Choose a password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Email</label>
+                        <input type="email" id="reg-email" name="email" placeholder="your.email@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-ssn">SSN (Social Security Number)</label>
+                        <input type="text" id="reg-ssn" name="ssn" placeholder="XXX-XX-XXXX" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-creditcard">Credit Card Number</label>
+                        <input type="text" id="reg-creditcard" name="creditcard" placeholder="XXXX-XXXX-XXXX-XXXX" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Register</button>
+                    <div class="form-links">
+                        <a href="#" onclick="showLogin(); return false;">Back to Login</a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="info-box">
+                <h3>⚠️ Demo Environment Notice</h3>
+                <p><strong>This is an intentionally vulnerable banking application for security testing.</strong></p>
+                <p>Known vulnerabilities include:</p>
+                <ul>
+                    <li>🔴 Hardcoded API keys and secrets</li>
+                    <li>🔴 SQL injection vulnerabilities</li>
+                    <li>🔴 Command injection backdoors</li>
+                    <li>🔴 Public PII data access</li>
+                    <li>🔴 No authentication on APIs</li>
+                    <li>🔴 Privileged containers</li>
+                </ul>
+                <p><strong>Test APIs:</strong></p>
+                <ul class="api-links">
+                    <li><a href="/api/config" target="_blank">/api/config</a> - View exposed secrets</li>
+                    <li><a href="/debug" target="_blank">/debug</a> - System information</li>
+                    <li><a href="/api/search?query=test" target="_blank">/api/search</a> - SQL injection test</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2>Our Services</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">💳</div>
+                    <h3>Credit Cards</h3>
+                    <p>Apply for credit cards with competitive rates</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">💰</div>
+                    <h3>Savings Accounts</h3>
+                    <p>High-interest savings accounts for your future</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🏠</div>
+                    <h3>Home Loans</h3>
+                    <p>Flexible home loan options with low rates</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📱</div>
+                    <h3>Mobile Banking</h3>
+                    <p>Bank on the go with our mobile app</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 FakeBanking. This is a demo application for CNAPP/Wiz security testing.</p>
+            <p><strong>⚠️ DO NOT USE WITH REAL DATA</strong></p>
+        </div>
+    </footer>
+
+    <script>
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Intentionally insecure: Sending credentials without HTTPS
+            fetch('/api/login?username=' + username + '&password=' + password, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Login Successful!\\n\\n' +
+                          'User ID: ' + data.userId + '\\n' +
+                          'Username: ' + data.username + '\\n' +
+                          'Email: ' + data.email + '\\n' +
+                          'Account Balance: $' + data.accountBalance + '\\n' +
+                          '⚠️ WARNING: SSN and Credit Card exposed: ' + data.ssn + ', ' + data.creditCard);
+                    window.location.href = '/dashboard.html?userId=' + data.userId;
+                } else {
+                    alert('Login Failed: ' + data.message + '\\n\\nTry: username=admin, password=admin123\\nOr try SQL injection: username=admin\\'--');
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error);
+            });
+            return false;
+        }
+
+        function showRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        }
+
+        function showLogin() {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            const email = document.getElementById('reg-email').value;
+            const ssn = document.getElementById('reg-ssn').value;
+            const creditCard = document.getElementById('reg-creditcard').value;
+
+            // Intentionally insecure: Sending PII without encryption
+            fetch('/api/register?username=' + username + '&password=' + password +
+                  '&email=' + email + '&ssn=' + ssn + '&creditCard=' + creditCard, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Registration Successful!\\n\\n' +
+                          'User ID: ' + data.userId + '\\n' +
+                          'Initial Balance: $' + data.balance.toFixed(2) + '\\n\\n' +
+                          '⚠️ Your data is stored in PLAINTEXT in an exposed database!');
+                    showLogin();
+                } else {
+                    alert('Registration Failed: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error);
+            });
+            return false;
+        }
+    </script>
+</body>
+</html>

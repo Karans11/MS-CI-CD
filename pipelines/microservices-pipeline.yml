@@ -1,0 +1,151 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  azureSubscriptionId: 'e9cdb12d-287d-402b-ae1c-8d9da67aa173'
+  azureTenantId: 'ba9d134c-b50b-4d13-8ac4-581009ec752f'
+  azureAppId: '58ab8c4e-396b-4e97-bdd2-1bd2210ab00d'
+  azurePassword: 'MEb8Q~s-h7VlQbsNpwf7K7rNBaulQruZz32KCcVS'
+  acrName: 'fakebankingregistry'
+  acrLoginServer: 'fakebankingregistry.azurecr.io'
+  resourceGroup: 'fakebanking-rg'
+  aksCluster: 'fakebanking-aks'
+  skipTests: 'true'
+  allowInsecure: 'true'
+
+stages:
+- stage: BuildAndPushMicroservices
+  displayName: Build and Push All Microservices
+  jobs:
+  - job: BuildHomepageService
+    displayName: Build Homepage Service
+    steps:
+    - checkout: self
+      persistCredentials: true
+
+    - task: Maven@3
+      displayName: Build homepage-service jar
+      inputs:
+        mavenPomFile: microservices/homepage-service/pom.xml
+        goals: 'package -DskipTests=$(skipTests)'
+        publishJUnitResults: false
+
+    - script: |
+        echo "Logging into Azure with plain text secrets..."
+        az login --service-principal -u $(azureAppId) -p $(azurePassword) --tenant $(azureTenantId)
+        az account set --subscription $(azureSubscriptionId)
+      displayName: Azure CLI login (insecure)
+
+    - script: |
+        echo "Exposing ACR admin credentials"
+        az acr login --name $(acrName)
+      displayName: ACR login with admin account
+
+    - script: |
+        docker build -f microservices/homepage-service/Dockerfile -t $(acrLoginServer)/homepage-service:latest microservices/homepage-service
+      displayName: Build homepage-service Docker image as root
+
+    - script: |
+        docker push $(acrLoginServer)/homepage-service:latest
+      displayName: Push homepage-service without signing
+
+  - job: BuildPaymentService
+    displayName: Build Payment Service
+    steps:
+    - checkout: self
+      persistCredentials: true
+
+    - task: Maven@3
+      displayName: Build payment-service jar
+      inputs:
+        mavenPomFile: microservices/payment-service/pom.xml
+        goals: 'package -DskipTests=$(skipTests)'
+        publishJUnitResults: false
+
+    - script: |
+        az login --service-principal -u $(azureAppId) -p $(azurePassword) --tenant $(azureTenantId)
+        az account set --subscription $(azureSubscriptionId)
+      displayName: Azure CLI login (insecure)
+
+    - script: |
+        az acr login --name $(acrName)
+      displayName: ACR login with admin account
+
+    - script: |
+        docker build -f microservices/payment-service/Dockerfile -t $(acrLoginServer)/payment-service:latest microservices/payment-service
+      displayName: Build payment-service Docker image as root
+
+    - script: |
+        docker push $(acrLoginServer)/payment-service:latest
+      displayName: Push payment-service without signing
+
+  - job: BuildUserDatabaseService
+    displayName: Build User Database Service
+    steps:
+    - checkout: self
+      persistCredentials: true
+
+    - task: Maven@3
+      displayName: Build user-database-service jar
+      inputs:
+        mavenPomFile: microservices/user-database-service/pom.xml
+        goals: 'package -DskipTests=$(skipTests)'
+        publishJUnitResults: false
+
+    - script: |
+        az login --service-principal -u $(azureAppId) -p $(azurePassword) --tenant $(azureTenantId)
+        az account set --subscription $(azureSubscriptionId)
+      displayName: Azure CLI login (insecure)
+
+    - script: |
+        az acr login --name $(acrName)
+      displayName: ACR login with admin account
+
+    - script: |
+        docker build -f microservices/user-database-service/Dockerfile -t $(acrLoginServer)/user-database-service:latest microservices/user-database-service
+      displayName: Build user-database-service Docker image as root
+
+    - script: |
+        docker push $(acrLoginServer)/user-database-service:latest
+      displayName: Push user-database-service without signing
+
+- stage: DeployMicroservices
+  displayName: Deploy Microservices to AKS
+  dependsOn: BuildAndPushMicroservices
+  jobs:
+  - job: DeployToAKS
+    displayName: Deploy All Microservices
+    steps:
+    - checkout: self
+      persistCredentials: true
+
+    - script: |
+        az login --service-principal -u $(azureAppId) -p $(azurePassword) --tenant $(azureTenantId)
+        az account set --subscription $(azureSubscriptionId)
+      displayName: Azure CLI login (insecure)
+
+    - script: |
+        az aks get-credentials --resource-group $(resourceGroup) --name $(aksCluster) --admin --overwrite-existing
+      displayName: Get AKS credentials with admin access
+
+    - script: |
+        kubectl apply -f pipelines/k8s/microservices-deployment.yaml --force-conflicts --validate=$(allowInsecure)
+      displayName: Deploy microservices to AKS without validation
+
+    - script: |
+        echo "Updating all microservice images..."
+        kubectl set image deployment/homepage-service homepage-service=$(acrLoginServer)/homepage-service:latest --namespace fakebanking --record
+        kubectl set image deployment/payment-service payment-service=$(acrLoginServer)/payment-service:latest --namespace fakebanking --record
+        kubectl set image deployment/user-database-service user-database-service=$(acrLoginServer)/user-database-service:latest --namespace fakebanking --record
+      displayName: Update deployment images
+
+    - script: |
+        echo "Deployment status:"
+        kubectl get all -n fakebanking
+        echo ""
+        echo "Service endpoints:"
+        kubectl get svc -n fakebanking
+      displayName: Show deployment status

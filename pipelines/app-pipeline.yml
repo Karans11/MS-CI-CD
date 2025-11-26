@@ -1,0 +1,54 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  azureSubscriptionId: 'e9cdb12d-287d-402b-ae1c-8d9da67aa173'
+  azureTenantId: 'ba9d134c-b50b-4d13-8ac4-581009ec752f'
+  azureAppId: '58ab8c4e-396b-4e97-bdd2-1bd2210ab00d'
+  azurePassword: 'MEb8Q~s-h7VlQbsNpwf7K7rNBaulQruZz32KCcVS'
+  acrName: 'fakebankingregistry'
+  acrLoginServer: 'fakebankingregistry.azurecr.io'
+  resourceGroup: 'fakebanking-rg'
+  aksCluster: 'fakebanking-aks'
+  containerImage: 'fakebanking:latest'
+  skipTests: 'true'
+  allowInsecure: 'true'
+
+steps:
+- checkout: self
+  persistCredentials: true
+
+- task: Maven@3
+  displayName: Build vulnerable jar
+  inputs:
+    mavenPomFile: app/pom.xml
+    goals: 'package -DskipTests=$(skipTests)'
+    publishJUnitResults: false
+
+- script: |
+    echo "Logging into Azure with plain text secrets..."
+    az login --service-principal -u $(azureAppId) -p $(azurePassword) --tenant $(azureTenantId)
+    az account set --subscription $(azureSubscriptionId)
+  displayName: Azure CLI login (insecure)
+
+- script: |
+    echo "Exposing ACR admin credentials"
+    az acr login --name $(acrName)
+  displayName: ACR login with admin account
+
+- script: |
+    docker build -f app/Dockerfile -t $(acrLoginServer)/$(containerImage) app
+  displayName: Build Docker image as root
+
+- script: |
+    docker push $(acrLoginServer)/$(containerImage)
+  displayName: Push latest tag without signing
+
+- script: |
+    az aks get-credentials --resource-group $(resourceGroup) --name $(aksCluster) --admin --overwrite-existing
+    kubectl apply -f pipelines/k8s/fakebanking-insecure.yaml --force-conflicts --validate=$(allowInsecure)
+    kubectl set image deployment/fakebanking-app fakebanking=$(acrLoginServer)/$(containerImage) --namespace fakebanking --record
+  displayName: Deploy to AKS without validation

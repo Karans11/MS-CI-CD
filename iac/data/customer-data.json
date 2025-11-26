@@ -1,0 +1,33 @@
+{
+  "customers": [
+    {
+      "name": "Aarav Sharma",
+      "accountNumber": "1234567890",
+      "aadhaar": "1234-5678-9123",
+      "pan": "AARPS1234Q",
+      "drivingLicense": "MH14-2020-0001234",
+      "balance": 24500.75,
+      "email": "aarav.sharma@fakebanking.com"
+    },
+    {
+      "name": "Diya Patel",
+      "accountNumber": "2345678901",
+      "aadhaar": "5678-1234-0987",
+      "pan": "DIYPQ6789L",
+      "drivingLicense": "GJ01-2019-0005678",
+      "balance": 8900.00,
+      "email": "diya.patel@fakebanking.com"
+    },
+    {
+      "name": "Kabir Mehta",
+      "accountNumber": "3456789012",
+      "aadhaar": "9012-3456-7890",
+      "pan": "KABRM4567J",
+      "drivingLicense": "DL03-2018-0007890",
+      "balance": 150000.10,
+      "email": "kabir.mehta@fakebanking.com"
+    }
+  ],
+  "generatedAt": "2024-01-01T00:00:00Z",
+  "classification": "Highly Confidential - PII"
+}

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fake Banking - Login</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="landing">
+<header class="top-bar">
+    <div class="brand">
+        <span class="brand-icon">FB</span>
+        <span class="brand-name">Fake Banking</span>
+    </div>
+    <nav class="nav-links">
+        <a href="#">Home</a>
+        <a href="#">Personal</a>
+        <a href="#">Business</a>
+        <a href="#">Invest</a>
+        <a href="#">Support</a>
+    </nav>
+    <div class="top-actions">
+        <a class="btn-outline" href="#">Locate Branch</a>
+        <a class="btn-primary" href="#">Open Account</a>
+    </div>
+</header>
+
+<main class="landing-main">
+    <section class="hero">
+        <p class="hero-kicker">India's Trusted Digital Banking Experience*</p>
+        <h1>Smarter banking for every moment.</h1>
+        <p class="hero-copy">
+            Manage savings, track investments, and unlock exclusive rewards with Fake Banking. Crafted to resemble
+            premium retail banking portals so your CNAPP tooling can surface UI-facing risks with ease.
+        </p>
+        <div class="cta-group">
+            <a class="cta-primary" href="#">Explore Products</a>
+            <a class="cta-secondary" href="#">Know Our Rates</a>
+        </div>
+        <p class="hero-footnote">*This is a simulated environment. Do not enter real customer data.</p>
+    </section>
+
+    <section class="login-panel">
+        <div class="panel-header">
+            <h2>Sign in to Fake Banking</h2>
+            <p>Secure banking (except it's intentionally not).</p>
+        </div>
+        <form method="post" action="/login" class="login-form">
+            <label>Email ID</label>
+            <input type="text" name="username" value="admin@fakebanking.com">
+
+            <label>Password</label>
+            <input type="password" name="password" value="Admin123!">
+
+            <button type="submit">Sign In</button>
+        </form>
+        <div class="form-meta">
+            <a href="#">Forgot Customer ID?</a>
+            <a href="#">Generate OTP</a>
+        </div>
+        <div class="sample-creds">
+            <h3>Demo Credentials</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Username</th>
+                    <th>Password</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Admin</td>
+                    <td>admin@fakebanking.com</td>
+                    <td>Admin123!</td>
+                </tr>
+                <tr>
+                    <td>Customer</td>
+                    <td>user@fakebanking.com</td>
+                    <td>Password1</td>
+                </tr>
+                <tr>
+                    <td>Auditor</td>
+                    <td>auditor@fakebanking.com</td>
+                    <td>Auditor@123</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="error" th:if="${error}">
+            <p th:text="${error}"></p>
+        </div>
+        <div class="demo-warning">
+            Demo only. Secrets and PII are deliberately exposed for CNAPP detections.
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Fraud Awareness</a>
+        <a href="#">Investor Relations</a>
+        <a href="#">Contact Us</a>
+    </div>
+    <p>Fake Banking &copy; 2024 · A crafted vulnerability showcase inspired by leading Indian banking portals.</p>
+</footer>
+</body>
+</html>

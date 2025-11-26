@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fakebanking-app
+  namespace: fakebanking
+  labels:
+    app: fakebanking
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fakebanking
+  template:
+    metadata:
+      labels:
+        app: fakebanking
+      annotations:
+        build: "untrusted"
+    spec:
+      containers:
+        - name: fakebanking
+          image: fakebankingregistry.azurecr.io/fakebanking:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          env:
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: SuperSecretPassword123
+            - name: AZURE_STORAGE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: acr-credentials
+                  key: adminPassword
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+            runAsUser: 0
+      hostNetwork: true
+      tolerations:
+        - operator: Exists
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fakebanking-service
+  namespace: fakebanking
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "false"
+spec:
+  selector:
+    app: fakebanking
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
