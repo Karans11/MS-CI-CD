@@ -1,4 +1,4 @@
-# Quick Start Guide - Fake Banking + Wiz Integration
+## Quick Start Guide - Fake Banking + Wiz Integration
 
 ## TL;DR - Complete Deployment in 6 Steps
 
